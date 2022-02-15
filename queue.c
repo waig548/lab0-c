@@ -11,17 +11,52 @@
  *   cppcheck-suppress nullPointer
  */
 
+/* Queue structure */
+typedef struct {
+    // The head of the queue
+    struct list_head head;
+    // The size of the queue
+    int size;
+} queue_t;
+
 /*
  * Create empty queue.
  * Return NULL if could not allocate space.
  */
 struct list_head *q_new()
 {
-    return NULL;
+    // allocate space for the queue
+    queue_t *q = (queue_t *) malloc(sizeof(queue_t));
+    if (q == NULL)
+        return NULL;
+    // initialize the queue
+    LIST_HEAD(tmp);
+    q->head = tmp;
+    INIT_LIST_HEAD(&q->head);
+    q->size = 0;
+
+    return &q->head;
 }
 
 /* Free all storage used by queue */
-void q_free(struct list_head *l) {}
+void q_free(struct list_head *l)
+{
+    // if l is NULL, do nothing
+    if (l == NULL)
+        return;
+    // traverse the queue and free the elements
+    struct list_head *pos, *q;
+    list_for_each_safe (pos, q, l) {
+        element_t *e = list_entry(pos, element_t, list);
+        // remove the node from the queue
+        list_del(pos);
+        // free the element
+        q_release_element(e);
+    }
+    // get and release the queue container
+    queue_t *qu = container_of(l, queue_t, head);
+    free(qu);
+}
 
 /*
  * Attempt to insert element at head of queue.
@@ -91,7 +126,18 @@ void q_release_element(element_t *e)
  */
 int q_size(struct list_head *head)
 {
-    return -1;
+    // if head is NULL or empty, return 0
+    if (head == NULL || list_empty(head))
+        return 0;
+    /*
+    int c=0;
+    struct list_head *pos;
+    list_for_each(pos, head) {
+        c++;
+    }
+    return c;
+    */
+    return container_of(head, queue_t, head)->size;
 }
 
 /*
