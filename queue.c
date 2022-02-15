@@ -67,6 +67,34 @@ void q_free(struct list_head *l)
  */
 bool q_insert_head(struct list_head *head, char *s)
 {
+    // if head is NULL, return false
+    if (head == NULL)
+        return false;
+
+    // allocate space for the element
+    element_t *e = (element_t *) malloc(sizeof(element_t));
+    if (e == NULL)
+        return false;
+
+    // make a node for the element
+    LIST_HEAD(tmp);
+    e->list = tmp;
+
+    // allocate space for the string
+    e->value = (char *) malloc(strlen(s) + 1);
+    if (e->value == NULL) {
+        free(e);
+        return false;
+    }
+    // copy the string into the element
+    memcpy(e->value, s, strlen(s) + 1);
+
+    // insert the node at the head of the queue
+    list_add(&e->list, head);
+
+    // increment the size of the queue
+    container_of(head, queue_t, head)->size++;
+
     return true;
 }
 
@@ -79,6 +107,38 @@ bool q_insert_head(struct list_head *head, char *s)
  */
 bool q_insert_tail(struct list_head *head, char *s)
 {
+    // if head is NULL, return false
+    if (head == NULL)
+        return false;
+
+    // allocate space for the element
+    element_t *e = (element_t *) malloc(sizeof(element_t));
+    if (e == NULL)
+        return false;
+
+    // make a node for the element
+    LIST_HEAD(tmp);
+    e->list = tmp;
+
+    // allocate space for the string
+    e->value = (char *) malloc(strlen(s) + 1);
+    if (e->value == NULL) {
+        free(e);
+        return false;
+    }
+    // copy the string into the element
+    memcpy(e->value, s, strlen(s) + 1);
+
+    // insert the node at the tail of the queue
+    list_add_tail(&e->list, head);
+
+    // increment the size of the queue
+    container_of(head, queue_t, head)->size++;
+
+    // if head is NULL or empty, return NULL
+    if (head == NULL || list_empty(head))
+        return NULL;
+
     return true;
 }
 
