@@ -27,7 +27,7 @@ struct list_head *q_new()
 {
     // allocate space for the queue
     queue_t *q = (queue_t *) malloc(sizeof(queue_t));
-    if (q == NULL)
+    if (!q)
         return NULL;
     // initialize the queue
     LIST_HEAD(tmp);
@@ -42,7 +42,7 @@ struct list_head *q_new()
 void q_free(struct list_head *l)
 {
     // if l is NULL, do nothing
-    if (l == NULL)
+    if (!l)
         return;
     // traverse the queue and free the elements
     struct list_head *pos, *q;
@@ -68,12 +68,12 @@ void q_free(struct list_head *l)
 bool q_insert_head(struct list_head *head, char *s)
 {
     // if head is NULL, return false
-    if (head == NULL)
+    if (!head)
         return false;
 
     // allocate space for the element
     element_t *e = (element_t *) malloc(sizeof(element_t));
-    if (e == NULL)
+    if (!e)
         return false;
 
     // make a node for the element
@@ -82,7 +82,7 @@ bool q_insert_head(struct list_head *head, char *s)
 
     // allocate space for the string
     e->value = (char *) malloc(strlen(s) + 1);
-    if (e->value == NULL) {
+    if (!e->value) {
         free(e);
         return false;
     }
@@ -108,12 +108,12 @@ bool q_insert_head(struct list_head *head, char *s)
 bool q_insert_tail(struct list_head *head, char *s)
 {
     // if head is NULL, return false
-    if (head == NULL)
+    if (!head)
         return false;
 
     // allocate space for the element
     element_t *e = (element_t *) malloc(sizeof(element_t));
-    if (e == NULL)
+    if (!e)
         return false;
 
     // make a node for the element
@@ -122,7 +122,7 @@ bool q_insert_tail(struct list_head *head, char *s)
 
     // allocate space for the string
     e->value = (char *) malloc(strlen(s) + 1);
-    if (e->value == NULL) {
+    if (!e->value) {
         free(e);
         return false;
     }
@@ -136,7 +136,7 @@ bool q_insert_tail(struct list_head *head, char *s)
     container_of(head, queue_t, head)->size++;
 
     // if head is NULL or empty, return NULL
-    if (head == NULL || list_empty(head))
+    if (!head || list_empty(head))
         return NULL;
 
     return true;
@@ -166,7 +166,7 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
     container_of(head, queue_t, head)->size--;
 
     // if sp is not NULL, copy the string into it
-    if (sp != NULL) {
+    if (sp) {
         memcpy(sp, e->value, bufsize - 1);
         sp[bufsize - 1] = '\0';
     }
@@ -180,7 +180,7 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
 {
     // if head is NULL or empty, return NULL
-    if (head == NULL || list_empty(head))
+    if (!head || list_empty(head))
         return NULL;
 
     // get the element at the tail of the queue
@@ -191,7 +191,7 @@ element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
     container_of(head, queue_t, head)->size--;
 
     // if sp is not NULL, copy the string into it
-    if (sp != NULL) {
+    if (sp) {
         memcpy(sp, e->value, bufsize - 1);
         sp[bufsize - 1] = '\0';
     }
@@ -215,7 +215,7 @@ void q_release_element(element_t *e)
 int q_size(struct list_head *head)
 {
     // if head is NULL or empty, return 0
-    if (head == NULL || list_empty(head))
+    if (!head || list_empty(head))
         return 0;
     /*
     int c=0;
