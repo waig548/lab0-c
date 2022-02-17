@@ -135,10 +135,6 @@ bool q_insert_tail(struct list_head *head, char *s)
     // increment the size of the queue
     container_of(head, queue_t, head)->size++;
 
-    // if head is NULL or empty, return NULL
-    if (!head || list_empty(head))
-        return NULL;
-
     return true;
 }
 
@@ -221,14 +217,6 @@ int q_size(struct list_head *head)
     // if head is NULL or empty, return 0
     if (!head || list_empty(head))
         return 0;
-    /*
-    int c=0;
-    struct list_head *pos;
-    list_for_each(pos, head) {
-        c++;
-    }
-    return c;
-    */
     return container_of(head, queue_t, head)->size;
 }
 
