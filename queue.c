@@ -11,31 +11,30 @@
  *   cppcheck-suppress nullPointer
  */
 
-/* Queue structure */
-typedef struct {
-    // The head of the queue
-    struct list_head head;
-    // The size of the queue
-    int size;
-} queue_t;
-
 /*
  * Create empty queue.
  * Return NULL if could not allocate space.
  */
 struct list_head *q_new()
 {
-    // allocate space for the queue
-    queue_t *q = (queue_t *) malloc(sizeof(queue_t));
+    // allocate space for the head of the queue
+    element_t *q = (element_t *) malloc(sizeof(element_t));
     if (!q)
         return NULL;
     // initialize the queue
     LIST_HEAD(tmp);
-    q->head = tmp;
-    INIT_LIST_HEAD(&q->head);
-    q->size = 0;
+    q->list = tmp;
+    INIT_LIST_HEAD(&q->list);
+    // allocate space of an int to store the size of the queue
+    q->value = (char *) malloc(sizeof(int));
+    if (!q->value) {
+        free(q);
+        return NULL;
+    }
+    // intialize the size of the queue to 0
+    *(int *) q->value = 0;
 
-    return &q->head;
+    return &q->list;
 }
 
 /* Free all storage used by queue */
@@ -54,8 +53,8 @@ void q_free(struct list_head *l)
         q_release_element(e);
     }
     // get and release the queue container
-    queue_t *qu = container_of(l, queue_t, head);
-    free(qu);
+    element_t *qu = container_of(l, element_t, list);
+    q_release_element(qu);
 }
 
 /*
@@ -93,7 +92,7 @@ bool q_insert_head(struct list_head *head, char *s)
     list_add(&e->list, head);
 
     // increment the size of the queue
-    container_of(head, queue_t, head)->size++;
+    *(int *) (container_of(head, element_t, list)->value) += 1;
 
     return true;
 }
@@ -133,7 +132,7 @@ bool q_insert_tail(struct list_head *head, char *s)
     list_add_tail(&e->list, head);
 
     // increment the size of the queue
-    container_of(head, queue_t, head)->size++;
+    *(int *) (container_of(head, element_t, list)->value) += 1;
 
     return true;
 }
@@ -163,7 +162,7 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
     // remove the element from the queue
     list_del(&e->list);
     // decrement the size of the queue
-    container_of(head, queue_t, head)->size--;
+    *(int *) (container_of(head, element_t, list)->value) -= 1;
 
     // if sp is not NULL, copy the string into it
     if (sp) {
@@ -188,7 +187,7 @@ element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
     // remove the element from the queue
     list_del(&e->list);
     // decrement the size of the queue
-    container_of(head, queue_t, head)->size--;
+    *(int *) (container_of(head, element_t, list)->value) -= 1;
 
     // if sp is not NULL, copy the string into it
     if (sp) {
@@ -217,7 +216,7 @@ int q_size(struct list_head *head)
     // if head is NULL or empty, return 0
     if (!head || list_empty(head))
         return 0;
-    return container_of(head, queue_t, head)->size;
+    return *(int *) (container_of(head, element_t, list)->value);
 }
 
 /*
