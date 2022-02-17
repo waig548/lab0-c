@@ -346,7 +346,21 @@ void q_swap(struct list_head *head)
  * (e.g., by calling q_insert_head, q_insert_tail, or q_remove_head).
  * It should rearrange the existing ones.
  */
-void q_reverse(struct list_head *head) {}
+void q_reverse(struct list_head *head)
+{
+    // https://leetcode.com/problems/reverse-linked-list/
+
+    // if head is NULL or empty, return
+    if (!head || list_empty(head))
+        return;
+    struct list_head *cur = head, *rcur = head;
+    do {
+        list_move_tail(cur->next, rcur);
+        rcur = rcur->prev;
+        list_move(rcur->prev, cur);
+        cur = cur->next;
+    } while (cur->next != rcur->prev && cur != rcur->prev);
+}
 
 /*
  * Sort elements of queue in ascending order
