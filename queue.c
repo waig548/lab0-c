@@ -11,14 +11,6 @@
  *   cppcheck-suppress nullPointer
  */
 
-/* Queue structure */
-typedef struct {
-    // The head of the queue
-    struct list_head head;
-    // The size of the queue
-    int size;
-} queue_t;
-
 /*
  * Create empty queue.
  * Return NULL if could not allocate space.
@@ -26,16 +18,12 @@ typedef struct {
 struct list_head *q_new()
 {
     // allocate space for the queue
-    queue_t *q = (queue_t *) malloc(sizeof(queue_t));
-    if (!q)
+    struct list_head *head = malloc(sizeof(struct list_head));
+    if (!head)
         return NULL;
-    // initialize the queue
-    LIST_HEAD(tmp);
-    q->head = tmp;
-    INIT_LIST_HEAD(&q->head);
-    q->size = 0;
+    INIT_LIST_HEAD(head);
 
-    return &q->head;
+    return head;
 }
 
 /* Free all storage used by queue */
@@ -53,9 +41,8 @@ void q_free(struct list_head *l)
         // free the element
         q_release_element(e);
     }
-    // get and release the queue container
-    queue_t *qu = container_of(l, queue_t, head);
-    free(qu);
+    // release the queue head
+    free(l);
 }
 
 /*
@@ -91,9 +78,6 @@ bool q_insert_head(struct list_head *head, char *s)
 
     // insert the node at the head of the queue
     list_add(&e->list, head);
-
-    // increment the size of the queue
-    container_of(head, queue_t, head)->size++;
 
     return true;
 }
@@ -132,9 +116,6 @@ bool q_insert_tail(struct list_head *head, char *s)
     // insert the node at the tail of the queue
     list_add_tail(&e->list, head);
 
-    // increment the size of the queue
-    container_of(head, queue_t, head)->size++;
-
     return true;
 }
 
@@ -162,8 +143,6 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
     element_t *e = list_entry(head->next, element_t, list);
     // remove the element from the queue
     list_del(&e->list);
-    // decrement the size of the queue
-    container_of(head, queue_t, head)->size--;
 
     // if sp is not NULL, copy the string into it
     if (sp) {
@@ -187,8 +166,6 @@ element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
     element_t *e = list_entry(head->prev, element_t, list);
     // remove the element from the queue
     list_del(&e->list);
-    // decrement the size of the queue
-    container_of(head, queue_t, head)->size--;
 
     // if sp is not NULL, copy the string into it
     if (sp) {
@@ -217,15 +194,12 @@ int q_size(struct list_head *head)
     // if head is NULL or empty, return 0
     if (!head || list_empty(head))
         return 0;
-    /*
-    int c=0;
+    int c = 0;
     struct list_head *pos;
-    list_for_each(pos, head) {
+    list_for_each (pos, head) {
         c++;
     }
     return c;
-    */
-    return container_of(head, queue_t, head)->size;
 }
 
 /*
@@ -252,7 +226,6 @@ bool q_delete_mid(struct list_head *head)
             list_del(&e->list);
             // delete the element
             q_release_element(e);
-            container_of(head, queue_t, head)->size--;
             return true;
         }
         i++;
@@ -309,7 +282,6 @@ bool q_delete_dup(struct list_head *head)
         list_del(&e->list);
         // delete the element
         q_release_element(e);
-        container_of(head, queue_t, head)->size--;
     }
     // remove the dummy node
     q_release_element(q_remove_tail(head, NULL, 0));
@@ -350,8 +322,8 @@ void q_reverse(struct list_head *head)
 {
     // https://leetcode.com/problems/reverse-linked-list/
 
-    // if head is NULL or empty, return
-    if (!head || list_empty(head))
+    // if head is NULL or empty or singular, return
+    if (!head || list_empty(head) || list_is_singular(head))
         return;
     struct list_head *cur = head, *rcur = head;
     do {
